@@ -1,0 +1,272 @@
+import os
+import random
+import time 
+
+def clear_screen():
+    os.system("cls" if os.name == "nt" else "clear")
+
+def create_board(size, fill_value= ' '):
+    board = [[fill_value for _ in range(size + 1)] for _ in range(size + 1)]
+    for col in range(1, size + 1):
+        board[0][col] = col -1
+    for row in range(1, size + 1):
+        board[row][0] = row-1
+    return board
+
+
+def display_table(table):
+    cols = len(table[0])
+
+    cell_width = 4
+    horizontal_border = "+" + ("-" * cell_width + "+") * cols
+
+    print(horizontal_border)
+    for row in table:
+        print("|" + "|".join(f"{str(cell):^{cell_width}}" for cell in row) + "|")
+        print(horizontal_border)
+
+def game_mode_display(table1, table2, title1="Tablero del contrincante:", title2="Tu tablero:"):
+    title_width = max(len(title1), len(title2))
+    cell_width = 4  
+
+    print(f"{title1:^{title_width}}                                  {title2:^{title_width}}")
+    print("-" * (title_width + 80 + title_width))
+
+    rows1 = len(table1)
+    rows2 = len(table2)
+    max_rows = max(rows1, rows2)
+
+    horizontal_border1 = "+" + ("-" * cell_width + "+") * len(table1[0])
+    horizontal_border2 = "+" + ("-" * cell_width + "+") * len(table2[0])
+
+    for i in range(max_rows):
+        row1 = table1[i] if i < rows1 else [" "] * len(table1[0])
+        row2 = table2[i] if i < rows2 else [" "] * len(table2[0])
+
+        print(f"{'|' + '|'.join(f'{str(cell):^{cell_width}}' for cell in row1) + '|'}   "
+              f"{'|' + '|'.join(f'{str(cell):^{cell_width}}' for cell in row2) + '|'}")
+
+        print(horizontal_border1 + "   " + horizontal_border2)
+
+def update_board(table, row, col, new_value):
+    table[row][col] = new_value 
+
+
+def can_place_ship(board, row, col, ship, direction):
+    if direction == "H":
+        if col + ship > len(board[0]):
+            return False
+        coordinates = [(row, col + i) for i in range(ship)]
+        return all(board[r][c] == ' ' for r, c in coordinates)
+
+    elif direction == "V":
+        if row + ship > len(board):  
+            return False
+        coordinates = [(row + i, col) for i in range(ship)]
+        return all(board[r][c] == ' ' for r, c in coordinates)
+    
+def place_ship(board, r, c,size, dir):
+    for i in range(size): 
+        row = r + i if dir == 'V' else r
+        col = c + i if dir == 'H' else c
+        update_board(board, row, col, 'B')
+
+def ship_placement(board, ships):
+    for ship in ships:
+        while True:
+            try:
+                display_table(board)
+                print(f"Coloca el barco de tamaño {ship}")
+                row = int(input("Coloca el fila deseado: "))+1
+                col = int(input("Coloca la columna deseada: "))+1
+                direction = input("¿Horizontal (H) o Vertical (V)? ").strip().upper()
+                if direction in ["H", "V"] and can_place_ship(board, row, col, ship, direction):
+                    place_ship(board, row, col, ship, direction)
+                    clear_screen()
+                    break
+
+                else:
+                    print("No se puede colocar el barco aquí (demasiado cerca de otro o fuera del tablero). Intenta de nuevo.")
+            except (ValueError, IndexError):
+                print("Entrada inválida. Por favor, intenta de nuevo.")
+    return
+
+def get_coordinates(board, lookout):
+    ship_coordinates = {}
+    for row in range(1, len(board)): 
+        for col in range(1, len(board[0])): 
+            if board[row][col] == lookout:  
+                ship_coordinates[(row-1, col-1)] = False  
+    return ship_coordinates
+
+def can_place_mine(board, row, col):
+    return board[row][col] == " "  # Verifica si la casilla está vacía
+
+def place_mine(board, row, col):
+    if can_place_mine(board, row, col):
+        board[row][col] = "M"
+    else:
+        print("No se puede colocar la mina aquí.")
+
+def mine_placement(board, ships):
+    while True:
+        try:
+            display_table(board)
+            print(f"Coloca una mina.")
+            row = int(input("Coloca el renglón deseado: "))+1
+            col = int(input("Coloca la columna deseada: "))+1
+
+            if can_place_mine(board, row, col):
+                place_mine(board, row, col)  # Coloca la mina
+                if (row-1,col-1) in ships:
+                    print("¡Impacto!")
+                    update_board(board, row, col, 'B')
+                    ships[(row-1,col-1)] = True
+                    return False
+                else: 
+                    return True
+            else:
+                print("No se puede colocar la mina aquí. Intenta de nuevo.")
+        except (ValueError, IndexError):
+            print("Entrada inválida. Por favor, intenta de nuevo.")
+
+
+def move_mines(board, ships):
+    """Mueve todas las minas ('M') a posiciones aleatorias válidas."""
+    size = len(board)
+    for row in range(1, size):
+        for col in range(1, size):
+            if board[row][col] == "M":
+                # Borra la mina actual
+                board[row][col] = "O"
+                # Encuentra una nueva posición aleatoria
+                while True:
+                    new_row = random.randint(1, size - 1)
+                    new_col = random.randint(1, size - 1)
+                    if can_place_mine(board, new_row, new_col):
+                        board[new_row][new_col] = "M"
+                        if (row-1,col-1) in ships:
+                            print("¡Impacto!")
+                            update_board(board, row, col, 'B')
+                            ships[(row-1,col-1)] = True
+                            return False
+                        else: 
+                            return True
+            
+
+def take_turn(guess, board, coordinates):
+    while True:
+        try:
+            game_mode_display(guess, board)
+            print("Adivina una posición en el tablero enemigo.")
+            row = int(input(f"Ingrese la fila: "))+1
+            col = int(input(f"Ingrese la columna: "))+1
+            if guess[row][col] != " ":
+                print("¡Ya disparaste aquí! Intenta otra posición.")
+            elif (row-1,col-1) in coordinates:
+                print("¡Impacto!")
+                update_board(guess, row, col, 'B')
+                coordinates[(row-1,col-1)] = True
+                break
+            else:
+                print("¡Fallaste!")
+                update_board(guess, row, col, 'O')
+                break
+        except (ValueError, IndexError):
+            print("Entrada inválida. Por favor, intenta de nuevo.")
+
+
+
+def play_game():
+    size = 10
+    ship_size = [4,3,3,2,2,2,1,1,1,1]
+    first_player_b = create_board(size)
+    second_player_b = create_board(size)
+    first_guess_b = create_board(size)
+    second_guess_b = create_board(size)
+    
+    player_one = input("Cual es el nombre del primer jugador? ")
+    player_two = input("Cual es el nombre del segundo jugador? ")
+
+    clear_screen()
+    print(f"{player_one} coloca tus barcos")
+    ship_placement(first_player_b, ship_size)
+    display_table(first_player_b)
+    input(f"{player_one} este es tu tablero!\nPresiona cualquier letra para continuar\n")
+
+    clear_screen()
+    print(f"{player_two} coloca tus barcos")
+    ship_placement(second_player_b, ship_size)
+    display_table(second_player_b)
+    input(f"{player_two} este es tu tablero!\nPresiona cualquier letra para continuar\n")
+    clear_screen()
+
+    player1_ships = get_coordinates(first_player_b, 'B')
+    player2_ships = get_coordinates(second_player_b, 'B')
+    
+    turn = 0
+    player1_mine = True 
+    player2_mine = True
+    player1_mine_p = True 
+    player2_mine_p = True 
+
+    game = True
+    while game:
+        if turn % 2 == 0: 
+            print(f"\n--- Turno del Jugador {player_one} ---")
+            if player1_mine:
+                print("MENU:")
+                print("1. Colocar mina")
+                print("2. Jugar")
+                choice = int(input("Coloca el número de la acción deseada: "))
+                if choice == 1:
+                    player1_mine_p = mine_placement(first_guess_b, player2_ships)
+                    take_turn(first_guess_b, first_player_b, player2_ships)
+                    player1_mine = False
+                else:
+                    take_turn(first_guess_b, first_player_b, player2_ships)
+            else:
+                input("Cuando estes listo presiona cualquier tecla: ")
+                clear_screen()
+                if player1_mine_p:
+                    player1_mine_p = move_mines(first_guess_b, player2_ships)
+                take_turn(first_guess_b, first_player_b, player2_ships)
+            if all(player2_ships.values()):
+                print(f"¡{player_one} gana!")
+                game = False
+            game_mode_display(first_guess_b, first_player_b)
+            input("Para continuar presiona cualquier letra: ")
+            clear_screen()
+        else: 
+            print(f"\n--- Turno del Jugador {player_two} ---")
+            if player2_mine:
+                print("MENU:")
+                print("1. Colocar mina")
+                print("2. Jugar")
+                choice = int(input("Coloca el número de la acción deseada: "))
+                if choice == 1:
+                    player1_mine_p = mine_placement(second_guess_b, player1_ships)
+                    take_turn(second_guess_b, second_player_b, player1_ships)
+                    player2_mine = False
+                else:
+                    take_turn(second_guess_b, second_player_b, player1_ships)
+            else:
+                input("Cuando estes listo presiona cualquier tecla: ")
+                clear_screen()
+                if player2_mine_p:
+                    player2_mine_p = move_mines(second_guess_b, player1_ships)
+                take_turn(second_guess_b, second_player_b, player1_ships)
+            if all(player1_ships.values()):
+                print(f"¡{player_two} gana!")
+                game = False
+            game_mode_display(second_guess_b, second_player_b)
+            input("Para continuar presiona cualquier letra: ")
+            clear_screen()
+        turn += 1
+
+
+
+
+if __name__ == "__main__":
+    clear_screen()
+    play_game()
