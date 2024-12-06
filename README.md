@@ -1,6 +1,6 @@
 # **Proyecto: Blue horizon battle**
 
-## **. Tipos de Usuario**
+## **1. Tipos de Usuario**
 
 1. **Jugador Casual**:
    - Objetivo: Disfrutar de un juego rápido y fácil.
