@@ -1,6 +1,6 @@
 # **Proyecto: Blue horizon battle**
 
-## **2. Tipos de Usuario**
+## **. Tipos de Usuario**
 
 1. **Jugador Casual**:
    - Objetivo: Disfrutar de un juego rápido y fácil.
@@ -78,7 +78,7 @@ En esta pantalla, los jugadores pueden:
 
 
 ---
-## 4. **Historia de Usuario**
+## 2. **Historia de Usuario**
 
 | **ID** | **Historia de Usuario**                                      | **Criterios de Aceptación**                                 | **Estimación** |
 |--------|-------------------------------------------------------------|------------------------------------------------------------|----------------|
@@ -179,7 +179,7 @@ Si el equipo sigue la metodología Scrum y prioriza las funcionalidades crítica
 
 ---
 
-# Análisis de Riesgos
+# 4. Análisis de Riesgos
 
 ## 1. Riesgos Humanos
 
@@ -286,7 +286,7 @@ Los riesgos más críticos están relacionados con la **IA**, el **guardado/carg
 
 ---
 
-# **Justificación del Proyecto**
+# **5. Justificación del Proyecto**
 
 El proyecto **Blue Horizon Battle** se justifica como una iniciativa educativa y tecnológica que combina el diseño de un sistema interactivo y divertido con la aplicación práctica de conceptos de **arquitectura de software**, **programación modular** y **metodologías ágiles**. Este proyecto tiene un impacto significativo tanto en el desarrollo de habilidades técnicas como en la creación de un producto funcional y de valor para los usuarios.
 
@@ -352,7 +352,7 @@ El proyecto **Blue Horizon Battle** no solo entrega un producto final funcional 
 
 ---
 
-## **1. Tareas a Realizar**
+## **6. Tareas a Realizar**
 
 ### **Tareas Generales**:
 - **Diseño del Sistema**:
@@ -390,7 +390,7 @@ El proyecto **Blue Horizon Battle** no solo entrega un producto final funcional 
 
 ---
 
-## **6. Explicación de lo Hecho en los Sprints**
+## **7. Explicación de lo Hecho en los Sprints**
 
 ### **Sprint 1**: *Diseño del Sistema y Tablero*
 - Definición de la arquitectura del sistema.
